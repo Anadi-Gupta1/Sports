@@ -134,12 +134,14 @@ class FeedbackManager:
             
             for i in range(frames):
                 arr[i] = np.sin(2 * np.pi * frequency * i / sample_rate)
-            
-            # Convert to pygame sound
+              # Convert to pygame sound
             arr = (arr * 32767).astype(np.int16)
-            arr = np.repeat(arr.reshape(frames, 1), 2, axis=1)
+            # Create stereo array properly
+            stereo_arr = np.zeros((frames, 2), dtype=np.int16)
+            stereo_arr[:, 0] = arr  # Left channel
+            stereo_arr[:, 1] = arr  # Right channel
             
-            success_sound = pygame.sndarray.make_sound(arr)
+            success_sound = pygame.sndarray.make_sound(stereo_arr)
             self.sound_cache["success"] = success_sound
             
             # Create failure sound (lower pitch buzz)
@@ -148,9 +150,11 @@ class FeedbackManager:
                 arr[i] = np.sin(2 * np.pi * frequency * i / sample_rate)
             
             arr = (arr * 32767).astype(np.int16)
-            arr = np.repeat(arr.reshape(frames, 1), 2, axis=1)
-            
-            failure_sound = pygame.sndarray.make_sound(arr)
+            # Create stereo array for failure sound
+            stereo_arr = np.zeros((frames, 2), dtype=np.int16)
+            stereo_arr[:, 0] = arr  # Left channel
+            stereo_arr[:, 1] = arr  # Right channel            
+            failure_sound = pygame.sndarray.make_sound(stereo_arr)
             self.sound_cache["failure"] = failure_sound
             
             logger.info("Default sounds created")
@@ -328,10 +332,11 @@ class FeedbackManager:
             for key, value in new_config.items():
                 if hasattr(self.config, key):
                     setattr(self.config, key, value)
-            
-            # Reinitialize audio if settings changed
+              # Reinitialize audio if settings changed
             if "volume" in new_config and self.audio_initialized:
-                pygame.mixer.set_volume(self.config.volume)
+                # Set volume for all cached sounds
+                for sound in self.sound_cache.values():
+                    sound.set_volume(self.config.volume)
             
             logger.info(f"Feedback configuration updated: {new_config}")
             

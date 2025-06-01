@@ -16,6 +16,7 @@ import json
 from pathlib import Path
 from typing import Dict, Any
 import uuid
+from datetime import datetime
 
 from core.tracker import ActionTracker
 from analytics.session_tracker import SessionTracker
@@ -174,6 +175,55 @@ async def broadcast_system_status():
 async def start_background_tasks():
     """Start background tasks"""
     asyncio.create_task(broadcast_system_status())
+
+@app.websocket("/ws")
+async def simple_websocket_endpoint(websocket: WebSocket):
+    """Simple WebSocket endpoint for testing"""
+    await websocket.accept()
+    connection_id = str(uuid.uuid4())
+    
+    try:
+        logger.info(f"Simple WebSocket connection {connection_id} established")
+        
+        # Send welcome message
+        await websocket.send_text(json.dumps({
+            "type": "connected",
+            "connection_id": connection_id,
+            "message": "Connected to Multi-Sport Action Tracker"
+        }))
+        
+        # Listen for messages
+        while True:
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                # Echo the message back with timestamp
+                response = {
+                    "type": "echo",
+                    "original_message": message,
+                    "timestamp": datetime.now().isoformat(),
+                    "connection_id": connection_id
+                }
+                
+                await websocket.send_text(json.dumps(response))
+                
+            except WebSocketDisconnect:
+                break
+            except json.JSONDecodeError:
+                await websocket.send_text(json.dumps({
+                    "type": "error",
+                    "message": "Invalid JSON format"
+                }))
+            except Exception as e:
+                logger.error(f"Error in simple WebSocket {connection_id}: {e}")
+                break
+                
+    except Exception as e:
+        logger.error(f"Simple WebSocket error for {connection_id}: {e}")
+    finally:
+        logger.info(f"Simple WebSocket connection {connection_id} closed")
+
 
 if __name__ == "__main__":
     # Run the application

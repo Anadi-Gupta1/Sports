@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .log-container {
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            margin-top: 20px;
+        }
+        .log-container p {
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .log-container .received {
+            background-color: #e3f2fd;
+        }
+        .log-container .sent {
+            background-color: #f1f8e9;
+        }
+        .log-container .status {
+            background-color: #fff3e0;
+        }
+        .log-container .error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        #connection-status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .connected {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+        }
+        .disconnected {
+            background-color: #ffcdd2;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Sport Action Tracker WebSocket Test</h1>
+        <div id="connection-status" class="disconnected">Disconnected</div>
+        
+        <div>
+            <label for="ws-url">WebSocket URL:</label>
+            <input type="text" id="ws-url" value="ws://localhost:8000/ws" />
+        </div>
+        
+        <div>
+            <button id="connect-btn">Connect</button>
+            <button id="disconnect-btn" disabled>Disconnect</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>Send Message</h2>
+        <div>
+            <label for="message-type">Message Type:</label>
+            <input type="text" id="message-type" value="ping" />
+        </div>
+        
+        <div>
+            <label for="message-data">Message Data (JSON):</label>
+            <input type="text" id="message-data" value='{"message": "Hello, server!"}' />
+        </div>
+        
+        <button id="send-btn" disabled>Send Message</button>
+    </div>
+    
+    <div class="container">
+        <h2>WebSocket Log</h2>
+        <button id="clear-log-btn">Clear Log</button>
+        <div id="log" class="log-container"></div>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const connectBtn = document.getElementById('connect-btn');
+        const disconnectBtn = document.getElementById('disconnect-btn');
+        const sendBtn = document.getElementById('send-btn');
+        const clearLogBtn = document.getElementById('clear-log-btn');
+        const wsUrlInput = document.getElementById('ws-url');
+        const messageTypeInput = document.getElementById('message-type');
+        const messageDataInput = document.getElementById('message-data');
+        const logContainer = document.getElementById('log');
+        const connectionStatus = document.getElementById('connection-status');
+        
+        // WebSocket instance
+        let socket = null;
+        
+        // Connect to WebSocket
+        connectBtn.addEventListener('click', () => {
+            const url = wsUrlInput.value.trim();
+            if (!url) {
+                addLog('Please enter a WebSocket URL', 'error');
+                return;
+            }
+            
+            try {
+                socket = new WebSocket(url);
+                
+                socket.onopen = (event) => {
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.className = 'connected';
+                    
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                    sendBtn.disabled = false;
+                    
+                    addLog(`Connection established to ${url}`, 'status');
+                };
+                
+                socket.onclose = (event) => {
+                    connectionStatus.textContent = 'Disconnected';
+                    connectionStatus.className = 'disconnected';
+                    
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                    sendBtn.disabled = true;
+                    
+                    addLog('Connection closed', 'status');
+                    socket = null;
+                };
+                
+                socket.onerror = (error) => {
+                    addLog(`WebSocket Error: ${error}`, 'error');
+                };
+                
+                socket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        const formattedData = JSON.stringify(data, null, 2);
+                        addLog(`Received: ${formattedData}`, 'received');
+                    } catch (error) {
+                        addLog(`Received: ${event.data}`, 'received');
+                    }
+                };
+            } catch (error) {
+                addLog(`Error creating WebSocket: ${error.message}`, 'error');
+            }
+        });
+        
+        // Disconnect from WebSocket
+        disconnectBtn.addEventListener('click', () => {
+            if (socket) {
+                socket.close();
+            }
+        });
+        
+        // Send message
+        sendBtn.addEventListener('click', () => {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                addLog('WebSocket is not connected', 'error');
+                return;
+            }
+            
+            try {
+                const type = messageTypeInput.value.trim();
+                const dataStr = messageDataInput.value.trim();
+                let data = {};
+                
+                try {
+                    data = JSON.parse(dataStr);
+                } catch (error) {
+                    addLog(`Invalid JSON: ${error.message}`, 'error');
+                    return;
+                }
+                
+                const message = {
+                    type: type,
+                    data: data
+                };
+                
+                const messageStr = JSON.stringify(message);
+                socket.send(messageStr);
+                
+                addLog(`Sent: ${JSON.stringify(message, null, 2)}`, 'sent');
+            } catch (error) {
+                addLog(`Error sending message: ${error.message}`, 'error');
+            }
+        });
+        
+        // Clear log
+        clearLogBtn.addEventListener('click', () => {
+            logContainer.innerHTML = '';
+        });
+        
+        // Helper functions
+        function addLog(message, type) {
+            const logEntry = document.createElement('p');
+            logEntry.textContent = message;
+            logEntry.className = type;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>

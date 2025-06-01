@@ -363,3 +363,52 @@ class WebSocketHandler:
                 for session_id, connections in manager.session_connections.items()
             }
         }
+    
+
+# Add simple WebSocket endpoint for testing (without authentication)
+async def websocket_test_endpoint(websocket: WebSocket):
+    """Simple WebSocket endpoint for testing connections"""
+    await websocket.accept()
+    connection_id = f"test_{datetime.now().timestamp()}"
+    
+    try:
+        logger.info(f"Test WebSocket connection established: {connection_id}")
+        
+        # Send welcome message
+        await websocket.send_text(json.dumps({
+            "type": "connection",
+            "status": "connected",
+            "connection_id": connection_id,
+            "message": "WebSocket connection established successfully!"
+        }))
+        
+        while True:
+            try:
+                # Wait for messages from client
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                # Echo the message back
+                response = {
+                    "type": "echo",
+                    "original_message": message,
+                    "timestamp": datetime.now().isoformat(),
+                    "connection_id": connection_id
+                }
+                
+                await websocket.send_text(json.dumps(response))
+                
+            except WebSocketDisconnect:
+                logger.info(f"Test WebSocket client disconnected: {connection_id}")
+                break
+            except Exception as e:
+                logger.error(f"Error in test WebSocket: {e}")
+                await websocket.send_text(json.dumps({
+                    "type": "error",
+                    "message": str(e)
+                }))
+                
+    except Exception as e:
+        logger.error(f"Error in test WebSocket endpoint: {e}")
+    finally:
+        logger.info(f"Test WebSocket connection closed: {connection_id}")

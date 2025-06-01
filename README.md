@@ -55,24 +55,46 @@ multi-sport-tracker/
 
 ## 🚀 Quick Start
 
-### 1. Setup Environment
+### Option 1: Automated Startup (Recommended)
 ```bash
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Setup frontend (if using React dashboard)
-cd frontend
-npm install
+# Complete setup and startup
+python startup.py
 ```
 
-### 2. Run the Application
+### Option 2: Manual Setup
 ```bash
-# Start backend server
-python -m backend.main
+# 1. Install dependencies
+pip install -r requirements.txt
+cd frontend && npm install
 
-# Start frontend (in another terminal)
+# 2. Start backend
+python backend/main.py
+
+# 3. Start frontend (new terminal)
 cd frontend && npm start
 ```
+
+### Option 3: Test Everything
+```bash
+# Run comprehensive tests
+python test_project.py
+```
+
+## 🧪 Testing & Validation
+
+The project includes comprehensive testing tools:
+
+### Run Tests
+```bash
+python test_project.py
+```
+
+### Component Tests
+- ✅ Backend API endpoints
+- ✅ WebSocket connectivity 
+- ✅ Sports model accuracy
+- ✅ Feedback system functionality
+- ✅ Camera integration
 
 ### 3. Configure Your Sport
 1. Open the web dashboard at `http://localhost:3000`

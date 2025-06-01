@@ -30,8 +30,7 @@ class SportFactory:
             logger.info("All sport modules initialized")
         except Exception as e:
             logger.error(f"Error initializing sports: {e}")
-    
-    @classmethod
+      @classmethod
     def register_sport(cls, sport_name: str, sport_class):
         """Register a new sport module"""
         cls._sport_modules[sport_name.lower()] = sport_class
@@ -52,11 +51,10 @@ class SportFactory:
                 sport_class = cls._sport_modules[sport_name_lower]
                 return sport_class(config)
             else:
-                logger.error(f"Sport module not found: {sport_name}")
-                return None
+                raise ValueError(f"Unknown sport: {sport_name}")
                 
         except Exception as e:
-            logger.error(f"Error creating sport module {sport_name}: {e}")
+            logger.error(f"Failed to create sport module for {sport_name}: {e}")
             raise
     
     @classmethod
@@ -64,20 +62,20 @@ class SportFactory:
         """Dynamically import sport module"""
         try:
             if sport_name == "basketball":
-                from .basketball import BasketballTracker
+                from sports.basketball import BasketballTracker
                 cls.register_sport("basketball", BasketballTracker)
             
             elif sport_name == "tennis":
-                from .tennis import TennisTracker
+                from sports.tennis import TennisTracker
                 cls.register_sport("tennis", TennisTracker)
             
             elif sport_name == "soccer" or sport_name == "football":
-                from .soccer import SoccerTracker
+                from sports.soccer import SoccerTracker
                 cls.register_sport("soccer", SoccerTracker)
                 cls.register_sport("football", SoccerTracker)
             
             elif sport_name == "golf":
-                from .golf import GolfTracker
+                from sports.golf import GolfTracker
                 cls.register_sport("golf", GolfTracker)
             
             else:
@@ -85,8 +83,7 @@ class SportFactory:
                 
         except ImportError as e:
             logger.error(f"Failed to import sport module {sport_name}: {e}")
-    
-    @classmethod
+      @classmethod
     def get_available_sports(cls) -> list:
         """Get list of available sport modules"""
         cls._initialize_sports()  # Ensure sports are loaded
@@ -96,7 +93,6 @@ class SportFactory:
     def get_sport_info(cls, sport_name: str) -> Optional[Dict[str, Any]]:
         """Get information about a specific sport"""
         try:
-            cls._initialize_sports()  # Ensure sports are loaded
             sport_name_lower = sport_name.lower()
             
             if sport_name_lower not in cls._sport_modules:
@@ -119,13 +115,3 @@ class SportFactory:
         except Exception as e:
             logger.error(f"Error getting sport info for {sport_name}: {e}")
             return None
-
-def get_available_sports():
-    """Convenience function to get available sports"""
-    return SportFactory.get_available_sports()
-
-def create_sport_tracker(sport_name: str, config: Dict[str, Any] = None):
-    """Convenience function to create sport tracker"""
-    if config is None:
-        config = {}
-    return SportFactory.create_sport(sport_name, config)
