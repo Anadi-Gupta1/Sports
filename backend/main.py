@@ -49,7 +49,7 @@ app.add_middleware(
 )
 
 # Include API routes
-app.include_router(router, prefix="/api/v1", tags=["api"])
+app.include_router(router, prefix="/api", tags=["api"])
 
 # Serve static files (frontend build)
 frontend_path = Path(__file__).parent.parent / "frontend" / "build"
@@ -70,9 +70,8 @@ async def startup_event():
         # Initialize action tracker
         await action_tracker.initialize()
         logger.info("Action tracker initialized successfully")
-        
-        # Initialize session tracker database
-        session_tracker.initialize_database()
+          # Initialize session tracker database
+        session_tracker._init_database()
         logger.info("Session tracker database initialized")
         
         logger.info("Application startup complete!")

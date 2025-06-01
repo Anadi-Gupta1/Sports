@@ -12,6 +12,7 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 import numpy as np
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +47,13 @@ class SessionSummary:
 class SessionTracker:
     """Tracks training sessions and performance analytics"""
     
-    def __init__(self, db_path: str = "data/sessions.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: str = None):
+        if db_path is None:
+            # Use absolute path relative to project root
+            project_root = Path(__file__).parent.parent.parent
+            self.db_path = str(project_root / "data" / "sessions.db")
+        else:
+            self.db_path = db_path
         self.current_session = None
         self.session_actions = []
         
@@ -565,3 +571,32 @@ class SessionTracker:
         except Exception as e:
             logger.error(f"Error exporting session data: {e}")
             return None
+        
+    def get_active_sessions(self) -> List[str]:
+        """Get list of active session IDs"""
+        try:
+            # For now, consider a session active if it's the current session
+            # In a more complex implementation, this could check for sessions
+            # that haven't been explicitly ended or are within a time window
+            if self.current_session:
+                return [self.current_session["session_id"]]
+            return []
+        except Exception as e:
+            logger.error(f"Error getting active sessions: {e}")
+            return []
+
+    def close(self):
+        """Close database connections and cleanup resources"""
+        try:
+            # End current session if active
+            if self.current_session:
+                self.end_session()
+            
+            # Clear session data
+            self.current_session = None
+            self.session_actions = []
+            
+            logger.info("SessionTracker closed successfully")
+            
+        except Exception as e:
+            logger.error(f"Error closing SessionTracker: {e}")

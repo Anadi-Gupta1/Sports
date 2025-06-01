@@ -262,3 +262,16 @@ class CameraManager:
                 "exposure": self.cap.get(cv2.CAP_PROP_EXPOSURE)
             }
         return {}
+    
+    def is_camera_available(self) -> bool:
+        """Check if camera is available and working"""
+        try:
+            if self.cap and self.cap.isOpened():
+                return True
+            elif len(self.available_cameras) > 0:
+                return True
+            else:
+                return False
+        except Exception as e:
+            logger.error(f"Error checking camera availability: {e}")
+            return False

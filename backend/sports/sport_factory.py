@@ -42,22 +42,23 @@ class SportFactory:
     
     @classmethod
     def _import_sport_module(cls, sport_name: str):
-        """Dynamically import sport module"""        try:
+        """Dynamically import sport module"""
+        try:
             if sport_name == "basketball":
-                from .basketball import BasketballTracker
+                from sports.basketball import BasketballTracker
                 cls.register_sport("basketball", BasketballTracker)
             
             elif sport_name == "tennis":
-                from .tennis import TennisTracker
+                from sports.tennis import TennisTracker
                 cls.register_sport("tennis", TennisTracker)
             
             elif sport_name == "soccer" or sport_name == "football":
-                from .soccer import SoccerTracker
+                from sports.soccer import SoccerTracker
                 cls.register_sport("soccer", SoccerTracker)
                 cls.register_sport("football", SoccerTracker)
             
             elif sport_name == "golf":
-                from .golf import GolfTracker
+                from sports.golf import GolfTracker
                 cls.register_sport("golf", GolfTracker)
             
             else:

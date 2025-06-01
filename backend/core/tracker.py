@@ -15,10 +15,10 @@ from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
-from backend.sports.sport_factory import SportFactory
-from backend.core.camera_manager import CameraManager
-from backend.core.pose_detector import PoseDetector
-from backend.analytics.session_tracker import SessionTracker
+from sports.sport_factory import SportFactory
+from core.camera_manager import CameraManager
+from core.pose_detector import PoseDetector
+from analytics.session_tracker import SessionTracker
 
 logger = logging.getLogger(__name__)
 

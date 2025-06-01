@@ -6,8 +6,8 @@ Detects serves, forehands, backhands, and volleys.
 import cv2
 import numpy as np
 from typing import Dict, List, Optional, Tuple
-from .base_sport import BaseSport
-from ..core.pose_detector import PoseDetector
+from sports.base_sport import BaseSport
+from core.pose_detector import PoseDetector
 
 
 class TennisTracker(BaseSport):

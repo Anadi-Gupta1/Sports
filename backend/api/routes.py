@@ -1,30 +1,34 @@
 """
 FastAPI routes for the Multi-Sport Action Tracker API
 
-This module contains all the REST API endpoints for the tracking system.
+This module con@router.get("/sports", response_model=List[Dict[str, Any]])ains all the REST API endpoints for the tracking system.
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import StreamingResponse
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import logging
 import asyncio
 import json
 import cv2
 from datetime import datetime
 
-from ..core.tracker import ActionTracker
-from ..analytics.session_tracker import SessionTracker
-from ..sports.sport_factory import SportFactory
-from .models import (
+from core.tracker import ActionTracker
+from analytics.session_tracker import SessionTracker
+from sports.sport_factory import SportFactory
+from api.models import (
     SessionCreate, SessionResponse, ActionResult, 
     SportConfig, SystemStatus, CameraConfig
 )
+from api.session_routes import router as session_router
 
 logger = logging.getLogger(__name__)
 
 # Create router
 router = APIRouter()
+
+# Include session routes
+router.include_router(session_router, prefix="/sessions", tags=["sessions"])
 
 # Global tracker instance (will be initialized)
 global_tracker: Optional[ActionTracker] = None
@@ -75,7 +79,7 @@ async def health_check(tracker: ActionTracker = Depends(get_tracker)):
         )
 
 
-@router.get("/sports", response_model=List[Dict[str, any]])
+@router.get("/sports", response_model=List[Dict[str, Any]])
 async def get_available_sports():
     """Get list of available sports"""
     try:
@@ -93,7 +97,7 @@ async def get_available_sports():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/sports/{sport_name}", response_model=Dict[str, any])
+@router.get("/sports/{sport_name}", response_model=Dict[str, Any])
 async def get_sport_info(sport_name: str):
     """Get information about a specific sport"""
     try:
@@ -195,7 +199,7 @@ async def get_session_actions(session_id: str, limit: int = 50):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/sessions/{session_id}/analytics", response_model=Dict[str, any])
+@router.get("/sessions/{session_id}/analytics", response_model=Dict[str, Any])
 async def get_session_analytics(session_id: str):
     """Get analytics for a session"""
     try:
@@ -357,7 +361,7 @@ async def get_user_sessions(user_id: str, limit: int = 20):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/user/{user_id}/analytics", response_model=Dict[str, any])
+@router.get("/user/{user_id}/analytics", response_model=Dict[str, Any])
 async def get_user_analytics(user_id: str):
     """Get overall analytics for a user"""
     try:

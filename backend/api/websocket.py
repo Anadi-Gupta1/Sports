@@ -12,9 +12,9 @@ import asyncio
 import json
 from datetime import datetime
 
-from ..core.tracker import ActionTracker
-from ..analytics.session_tracker import SessionTracker
-from .models import WebSocketMessage, ActionResult, FeedbackMessage
+from core.tracker import ActionTracker
+from analytics.session_tracker import SessionTracker
+from api.models import WebSocketMessage, ActionResult, FeedbackMessage
 
 logger = logging.getLogger(__name__)
 

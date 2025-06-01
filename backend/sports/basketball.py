@@ -11,7 +11,7 @@ import logging
 from typing import Dict, Any, Optional, List, Tuple
 import math
 
-from backend.sports.base_sport import BaseSportTracker
+from sports.base_sport import BaseSportTracker
 
 logger = logging.getLogger(__name__)
 
