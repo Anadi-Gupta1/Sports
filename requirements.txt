@@ -1,0 +1,41 @@
+# Multi-Sport Action Tracker Dependencies
+
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+websockets==12.0
+
+# Computer Vision & ML
+opencv-python==4.8.1.78
+mediapipe==0.10.7
+numpy==1.24.3
+scipy==1.11.4
+
+# Data Processing & Analytics
+pandas==2.1.4
+matplotlib==3.8.2
+seaborn==0.13.0
+
+# Database
+sqlite3 # Built-in with Python
+
+# Audio Processing
+pygame==2.5.2
+pydub==0.25.1
+
+# Configuration & Settings
+pydantic==2.5.0
+python-dotenv==1.0.0
+pyyaml==6.0.1
+
+# Export & Reporting
+reportlab==4.0.7
+jinja2==3.1.2
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Development
+black==23.11.0
+flake8==6.1.0
